@@ -1,11 +1,19 @@
-import React from 'react'
 import { useQuery } from 'react-query'
 import client from '../../client'
 
 const useGetAllCampaigns = () => {
     return useQuery(["campaigns"], async()=>{
-        const campaigns = await client.getAllCampaigns();
-        return campaigns;
+        try {
+            const campaigns = await client.getAllCampaigns();
+            return campaigns || [];
+        } catch (error) {
+            console.error("Error fetching campaigns:", error);
+            return [];
+        }
+    }, {
+        retry: false,
+        refetchOnWindowFocus: false,
+        initialData: []
     })
 }
 

@@ -15,14 +15,16 @@ import {
 import FundraiserCard from '../components/FundraiserCard';
 import { FcDonate, FcManager, FcFlashOn } from "react-icons/fc";
 import { Link } from 'react-router-dom';
-import funds from '../data';
 import useGetAllCampaigns from '../hooks/queries/useGetAllCampaigns';
 import styles from '../styles/Home.module.css'
 
 const LandingPage = () => {
 
-    const {isLoading, data:funds} = useGetAllCampaigns();
+    const {isLoading, data: funds, error} = useGetAllCampaigns();
     console.log("funds: ", funds);
+    console.log("isLoading: ", isLoading);
+    console.log("error: ", error);
+    
     return <div>
         <main className={styles.main}>
             <Container py={{ base: "4", md: "12" }} maxW={"7xl"} align={"left"}>
@@ -63,40 +65,55 @@ const LandingPage = () => {
                 </HStack>
 
                 <Divider marginTop="4" />
-                {isLoading ? <><h2>Loading...</h2></> :
+                {isLoading ? (
+                    <div style={{ padding: '20px', textAlign: 'center' }}>
+                        <h2>Loading fundraisers...</h2>
+                    </div>
+                ) : error ? (
+                    <div style={{ padding: '20px', textAlign: 'center' }}>
+                        <h2>Unable to load fundraisers</h2>
+                        <p>Please make sure MetaMask is connected and you're on the correct network.</p>
+                        <p style={{ fontSize: '14px', color: 'gray' }}>Error: {error.message}</p>
+                    </div>
+                ) : (
                     <SimpleGrid columns={{ base: 1, md: 3 }} spacing={10} py={8}>
-                            {funds.map((fund) => {
-                                return (
-                                    <div key={fund.id}>
-                                        <FundraiserCard
-                                            name={fund.name}
-                                            description={fund.description}
-                                            creatorId={fund.manager}
-                                            imageURL={"/images/default-campaign-image.jpg"}
-                                            id={fund.id}
-                                            // id={fund.id.toString()}
-                                            target={fund.goal.toString()}
-                                            balance={fund.balance.toString()}
-                                            ethPrice="NA"
-                                        />
-                                    </div>
-                                );
-                            })}
-                            
-                        {/* <div>
-                            <FundraiserCard
-                                name="test fundname"
-                                description="Just testing"
-                                creatorId="Some SHA string"
-                                imageURL="TBD"
-                                id="umm nope"
-                                target="10,000"
-                                balance="0"
-                                ethPrice="10 ETH"
-                            />
-                        </div> */}
+                        {funds && funds.length > 0 ? funds.map((fund) => {
+                            return (
+                                <div key={fund.id}>
+                                    <FundraiserCard
+                                        name={fund.name}
+                                        description={fund.description}
+                                        creatorId={fund.manager}
+                                        imageURL={"/images/default-campaign-image.jpg"}
+                                        id={fund.id}
+                                        // id={fund.id.toString()}
+                                        target={fund.goal.toString()}
+                                        balance={fund.balance.toString()}
+                                        ethPrice="NA"
+                                    />
+                                </div>
+                            );
+                        }) : (
+                            <div style={{ padding: '20px', textAlign: 'center' }}>
+                                <h3>No fundraisers available at the moment.</h3>
+                                <p>Be the first to create a fundraiser!</p>
+                            </div>
+                        )}
+                        
+                    {/* <div>
+                        <FundraiserCard
+                            name="test fundname"
+                            description="Just testing"
+                            creatorId="Some SHA string"
+                            imageURL="TBD"
+                            id="umm nope"
+                            target="10,000"
+                            balance="0"
+                            ethPrice="10 ETH"
+                        />
+                    </div> */}
                     </SimpleGrid>
-                }
+                )}
             </Container>
 
             <Container py={{ base: "4", md: "12" }} maxW={"7xl"} id="howitworks">
